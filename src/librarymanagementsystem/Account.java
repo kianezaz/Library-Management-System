@@ -12,9 +12,16 @@ public abstract class Account {
         this.user = user;
     }
     
-    public boolean login() {
-        DBConnection db = new DBConnection();
-        return db.verifyLogin(this.username, this.password);
+    public String getUsername() {
+        return this.username;
+    }
+    
+    public String getPassword() {
+        return this.password;
+    }
+    
+    public Person getUser() {
+        return this.user;
     }
     
 }

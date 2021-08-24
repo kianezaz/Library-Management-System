@@ -12,15 +12,6 @@ public class Member extends Account {
         super(username, password, user);
     }
     
-    public boolean login(String username, String password) {
-        DBConnection db = new DBConnection();
-        return db.verifyLogin(username, password);
-    }
-    
-    public boolean createAccount(String username, String password, Person user) {
-        DBConnection db = new DBConnection();
-        return db.createAccount(username, password, user);
-    }
     
     public boolean checkAvailabilityByTitle(String title) {
         DBConnection db = new DBConnection();

@@ -6,8 +6,8 @@ import java.util.List;
 
 public class DBConnection {
     
-    Connection myConn;
-    Statement myStmt;
+    public Connection myConn;
+    public Statement myStmt;
     
     public DBConnection() {
         try {
@@ -21,10 +21,14 @@ public class DBConnection {
         }
     }
     
-    public boolean verifyLogin(String username, String password) {
+    public boolean verifyLogin(String username, String password, String accountType) {
+        if (!accountType.equals("Librarians") && !accountType.equals("Members")) {
+            return false;
+        }
+        String singularAccType = accountType.substring(0, accountType.length() - 1);
         boolean correctLogin = false;
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Members WHERE member_username = " + username + " AND member_password = " + password);
+            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
             if (rs.next()) {
                 correctLogin = true;
             }
@@ -36,22 +40,35 @@ public class DBConnection {
         return correctLogin;
     }
     
-    public boolean createAccount(String username, String password, Person user) {
-        boolean accountCreated = false;
+    public boolean usernameAvailable(String username, String accountType) {
+        boolean available = false;
+        String singularAccType = accountType.substring(0, accountType.length() - 1);
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Members WHERE member_username = " + username);
+            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "'");
             if (!rs.next()) {
-                this.myStmt.executeUpdate("INSERT INTO Members(member_username, member_password, "
-                        + "member_name, member_email) VALUES(" + username + ", " + password + ", " 
-                        + user.getName() + ", " + user.getEmail());;
-                accountCreated = true;
+                available = true;
             }
         }
         catch (Exception e) {
             System.out.println("Failed to verify login");
             e.printStackTrace();
         }
-        return accountCreated;
+        return available;
+    }
+    
+    
+    public void createAccount(String username, String password, String accountType, Person user) {
+        String singularAccType = accountType.substring(0, accountType.length() - 1);
+        try {
+            // INSERT INTO Members(member_username, member_password, member_name, member_email) VALUES('n', 'pass', 'nader', ne@yahoo.com'
+            this.myStmt.executeUpdate("INSERT INTO " + accountType + "(" + singularAccType + "_username, " + singularAccType + "_password, "
+                    + singularAccType + "_name, " + singularAccType + "_email) VALUES('" + username + "', '" + password + "', '" 
+                    + user.getName() + "', '" + user.getEmail() + "')");
+        }
+        catch (Exception e) {
+            System.out.println("Failed to create account");
+            e.printStackTrace();
+        }
     }
     
     public ArrayList<Book> searchBooksByTitle(String title) {

@@ -8,15 +8,26 @@ public class Member extends Account {
     private Map<Book, Integer> booksCheckedOut;
     private int fine;
     
-    public Member(String username, String password, Person user) {
+    public Member(String username, String password, Person user, int fine) {
         super(username, password, user);
+        this.fine = fine;
     }
     
-    
-    public boolean checkAvailabilityByTitle(String title) {
+    public boolean doesNotHaveBook(Book book) {
+        if (book == null) {
+            return false;
+        }
         DBConnection db = new DBConnection();
-        ArrayList<Book> books = db.searchBooksByTitle(title);
-        Book selectedBook = Book.selectBookFromList(books);
-        return db.checkBookAvailability(selectedBook.getID());
+        if (db.userDoesNotHaveBook(this, book)) {
+            return true;
+        }
+        System.out.println("You currently have this book checked out");
+        return false;
     }
+    
+    public void checkoutBook(Book book) {
+        DBConnection db = new DBConnection();
+        db.checkoutBook(this, book);
+    }
+    
 }

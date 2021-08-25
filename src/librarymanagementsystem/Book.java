@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Book {
     
-    private static final AtomicInteger count = new AtomicInteger(0);
     private int id;
     private String title;
     private String author;
@@ -14,10 +13,19 @@ public class Book {
     private String genre;
     
     public Book(int id, String title, String primaryAuthor, String genre) {
-        this.id = count.getAndIncrement();
+        this.id = id;
         this.title = title;
         this.author = primaryAuthor;
         this.genre = genre;
+    }
+    
+    public boolean isAvailable() {
+        DBConnection db = new DBConnection();
+        if (db.bookAvailable(this)) {
+            return true;
+        }
+        System.out.println("Sorry, all copies of this book are currently checked out");
+        return false;
     }
     
     public static Book selectBookFromList(ArrayList<Book> books) {
@@ -32,7 +40,24 @@ public class Book {
         return books.get(input);
     }
     
+    //@Override
+    public boolean equals(Book book) {
+        return false;
+    }
+    
     public int getID() {
         return this.id;
+    }
+    
+    public String getTitle() {
+        return this.title;
+    }
+    
+    public String getAuthor() {
+        return this.author;
+    }
+    
+    public String getGenre() {
+        return this.genre;
     }
 }

@@ -21,23 +21,25 @@ public class DBConnection {
         }
     }
     
-    public boolean verifyLogin(String username, String password, String accountType) {
+    public Member verifyLogin(String username, String password, String accountType) {
         if (!accountType.equals("Librarians") && !accountType.equals("Members")) {
-            return false;
+            return null;
         }
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         boolean correctLogin = false;
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
+            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
             if (rs.next()) {
-                correctLogin = true;
+                Person user = new Person(rs.getString(3), rs.getString(4));
+                Member member = new Member(rs.getString(1), rs.getString(2), user, rs.getInt(5));
+                return member;
             }
         }
         catch (Exception e) {
             System.out.println("Failed to verify login");
             e.printStackTrace();
         }
-        return correctLogin;
+        return null;
     }
     
     public boolean usernameAvailable(String username, String accountType) {
@@ -74,7 +76,7 @@ public class DBConnection {
     public ArrayList<Book> searchBooksByTitle(String title) {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE book_title = " + title);
+            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE book_title = '" + title + "'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
@@ -90,7 +92,7 @@ public class DBConnection {
     public ArrayList<Book> searchBooksByAuthor(String author) {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE primary_author_name = " + author);
+            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE primary_author_name = '" + author +"'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
@@ -98,6 +100,22 @@ public class DBConnection {
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of book with author " + author);
+            e.printStackTrace();
+        }
+        return books;
+    }
+    
+    public ArrayList<Book> searchBooksByGenre(String genre) {
+        ArrayList<Book> books = new ArrayList<Book>();
+        try {
+            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE genre = '" + genre + "'");
+            while (rs.next()) {
+                Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
+                books.add(currBook);
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Failed to check availability of book with genre " + genre);
             e.printStackTrace();
         }
         return books;
@@ -119,19 +137,46 @@ public class DBConnection {
         return books;
     }
     
-    public boolean checkBookAvailability(int id) {
-        boolean isAvailable = false;
+    public boolean bookAvailable(Book book) {
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Books WHERE book_id = " + id + " AND book_numAvailable > 0");
+            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Books WHERE book_id = " + book.getID() + " AND book_num_available > 0");
             if (rs.next()) {
-                isAvailable = true;
+                return true;
             }
         }
         catch (Exception e) {
-            System.out.println("Failed to check availability of book with id " + id);
             e.printStackTrace();
         }
-        return isAvailable;
+        return false;
+    }
+    
+    public boolean userDoesNotHaveBook(Member member, Book book) {
+        try {
+            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            if (!rs.next()) {
+                return true;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    
+    public void checkoutBook(Member member, Book book) {
+        long dueTimeMilliseconds = System.currentTimeMillis() + (14 * 86400000);
+        Timestamp dueTime = new Timestamp(dueTimeMilliseconds);
+        try {
+            this.myStmt.executeUpdate("UPDATE Books SET book_num_available = book_num_available - 1, book_num_checked_out = book_num_checked_out + 1 WHERE Book_id = " + book.getID());
+            this.myStmt.executeUpdate("INSERT INTO Books_Members VALUES('" + member.getUsername() + "', " + book.getID() + ", '" + dueTime + "')");
+            return;
+        }
+        catch (Exception e) {
+            System.out.println("Failed to checkout book");
+            e.printStackTrace();
+        }
+        return;
     }
     
     

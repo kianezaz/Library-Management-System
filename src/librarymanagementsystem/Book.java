@@ -28,21 +28,21 @@ public class Book {
         return false;
     }
     
-    public static Book selectBookFromList(ArrayList<Book> books) {
-        String newLine = System.lineSeparator();
-        for (int i = 0; i < books.size(); i++) {
-            System.out.println("Enter " + i + " if this is the correct book");
-            System.out.println("Title: " + books.get(i).title + " | Author: " + books.get(i).author
-                    + " | Genre: " + books.get(i).genre + newLine);
+    
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Book)) {
+            return false;
         }
-        Scanner sc = new Scanner(System.in);
-        int input = sc.nextInt();
-        return books.get(input);
+        Book other = (Book) obj;
+        if (this.id == other.id) {
+            return true;
+        }
+        return false;
     }
     
-    //@Override
-    public boolean equals(Book book) {
-        return false;
+    public int hashCode() {
+        int result = title.hashCode() + this.author.hashCode();
+        return result;
     }
     
     public int getID() {

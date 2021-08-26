@@ -2,7 +2,10 @@ package librarymanagementsystem;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 
@@ -74,7 +77,7 @@ public class Main {
         System.out.println("Enter your new password: ");
         String password = sc.nextLine();
         newUser = new Person(firstName + " " + lastName, email);
-        db.createAccount(username, email, accountTypeString, newUser);
+        db.createAccount(username, password, accountTypeString, newUser);
         System.out.println("Account created!");
         printIdentityOptions();
     }
@@ -131,7 +134,7 @@ public class Main {
                 checkoutProcess(member);
             } 
             else if (actionOption == 2) {
-                // renewBook();
+                renewProcess(member);
             }
             else if (actionOption == 3) {
                 // listBooks();
@@ -149,6 +152,38 @@ public class Main {
                 System.out.println(badInput);
             }
         }
+    }
+    
+    public static void renewProcess(Member member) {
+        Scanner sc = new Scanner(System.in);
+        BookItem curr;
+        ArrayList<BookItem> allowedToRenew = new ArrayList<BookItem>();
+        for (int i = 0, j = 0; i < member.getBooksCheckedOut().size(); i++) {
+            curr = member.getBooksCheckedOut().get(i);
+            if (!curr.getRenewed()) {
+                System.out.println((j + 1) + "\tTitle: " + curr.getTitle() + 
+                        " | Author: " + curr.getAuthor() + " | Genre: " + curr.getGenre());
+                allowedToRenew.add(curr);
+                j++;
+            }
+        }
+        if (allowedToRenew.isEmpty()) {
+            System.out.println("No books to renew");
+            return;
+        }
+        System.out.println("Type the number that matches the book you would like to renew (you may only renew each book once)");
+        int bookNum;
+        while (true) {
+            bookNum = sc.nextInt();
+            if (bookNum < 1 || bookNum > allowedToRenew.size()) {
+                System.out.println(badInput);
+                continue;
+            }
+            break;
+        }
+        BookItem bookToRenew = allowedToRenew.get(bookNum - 1);
+        member.renewBook(bookToRenew);
+        System.out.println("Successfully renewed selected book!");
     }
     
     public static void checkoutProcess(Member member) {
@@ -214,20 +249,6 @@ public class Main {
         Book chosenBook = books.get(bookOption - 1);
         return chosenBook;
     }
-    
-    public static boolean validNumInput(int input, int min, int max) { 
-        if (input >= min && input <= max) {
-            return true;
-        }
-        return false;
-    }
-    
-    public static boolean endProgram(int input, int exitVal) {
-        if (input == exitVal) {
-            return true;
-        }
-        return false;
-    }
         
     
     public static void main(String[] args) {
@@ -236,38 +257,6 @@ public class Main {
         DBConnection db = new DBConnection();
         System.out.println("Welcome to the Library Management System!");
         printIdentityOptions();
-        /*
-        else {
-            if (option == 3) {
-                accountType = "Members";
-            }
-            else {
-                accountType = "Librarians";
-            }
-            Person newUser;
-            System.out.println("Enter your first name: ");
-            String firstName = sc.nextLine();
-            System.out.println("Enter your last name: ");
-            String lastName = sc.nextLine();
-            System.out.println("Enter your email: ");
-            String email = sc.nextLine();
-            System.out.println("Enter your new username: ");
-            String username;
-            do {
-                username = sc.nextLine();
-                if (db.usernameAvailable(username, accountType)) {
-                    break;
-                }
-                System.out.println("That username is not available. Please choose another username");
-            } while (true);
-            System.out.println("Enter your new password: ");
-            String password = sc.nextLine();
-            newUser = new Person(firstName + " " + lastName, email);
-            db.createAccount(username, email, accountType, newUser);
-            System.out.println("Account created!");
-            return;
-        }
-        */
     }
 
 }

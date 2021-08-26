@@ -2,6 +2,7 @@ package librarymanagementsystem;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DBConnection {
@@ -12,7 +13,7 @@ public class DBConnection {
     public DBConnection() {
         try {
             myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/library", "root", "root");
-            myStmt = myConn.createStatement();
+            //myStmt = myConn.createStatement();
             
         }
         catch (Exception e) {
@@ -21,18 +22,64 @@ public class DBConnection {
         }
     }
     
-    public Member verifyLogin(String username, String password, String accountType) {
+    public ArrayList<BookItem> getMemberBooks(String username) {
+        ArrayList<BookItem> memberBooks = new ArrayList<BookItem>();
+        try {
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT book_id, book_due_date, renewed FROM Books_Members WHERE member_username = '" + username + "'");
+            Book currBook;
+            while (rs.next()) {
+                currBook = this.searchBooksByID(rs.getInt(1));
+                //int currID = rs.getInt(1);
+                Timestamp dueTime = rs.getTimestamp(2);
+                Boolean renewed = rs.getBoolean(3);
+                BookItem currBookItem = new BookItem(currBook.getID(), currBook.getTitle(),
+                        currBook.getAuthor(), currBook.getGenre(), dueTime, renewed);
+                //System.out.println("Putting book with title " + currBook.getTitle() + " into map");
+                memberBooks.add(currBookItem);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return memberBooks;
+    }
+    
+    public void renewMemberBook(Member member, Book book) {
+        try {
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT book_due_date FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            if (rs.next()) {
+                long currDueDate = rs.getTimestamp(1).getTime();
+                Timestamp newDueDate = new Timestamp(currDueDate + (14 * 86400000));
+                st.executeUpdate("UPDATE Books_Members SET book_due_date = '" + newDueDate + "', renewed = TRUE WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Account verifyLogin(String username, String password, String accountType) {
         if (!accountType.equals("Librarians") && !accountType.equals("Members")) {
             return null;
         }
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         boolean correctLogin = false;
+        Account account;
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
             if (rs.next()) {
                 Person user = new Person(rs.getString(3), rs.getString(4));
-                Member member = new Member(rs.getString(1), rs.getString(2), user, rs.getInt(5));
-                return member;
+                if (accountType.equals("Members")) {
+                    ArrayList<BookItem> memberBooks = getMemberBooks(username);
+                    account = new Member(rs.getString(1), rs.getString(2), user, memberBooks, rs.getInt(5));
+                }
+                else {
+                    account = new Librarian(rs.getString(1), rs.getString(2), user);
+                }
+                return account;
             }
         }
         catch (Exception e) {
@@ -46,7 +93,8 @@ public class DBConnection {
         boolean available = false;
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "'");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "'");
             if (!rs.next()) {
                 available = true;
             }
@@ -63,7 +111,8 @@ public class DBConnection {
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         try {
             // INSERT INTO Members(member_username, member_password, member_name, member_email) VALUES('n', 'pass', 'nader', ne@yahoo.com'
-            this.myStmt.executeUpdate("INSERT INTO " + accountType + "(" + singularAccType + "_username, " + singularAccType + "_password, "
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("INSERT INTO " + accountType + "(" + singularAccType + "_username, " + singularAccType + "_password, "
                     + singularAccType + "_name, " + singularAccType + "_email) VALUES('" + username + "', '" + password + "', '" 
                     + user.getName() + "', '" + user.getEmail() + "')");
         }
@@ -76,7 +125,8 @@ public class DBConnection {
     public ArrayList<Book> searchBooksByTitle(String title) {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE book_title = '" + title + "'");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_title = '" + title + "'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
@@ -92,7 +142,8 @@ public class DBConnection {
     public ArrayList<Book> searchBooksByAuthor(String author) {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE primary_author_name = '" + author +"'");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE primary_author_name = '" + author +"'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
@@ -108,7 +159,8 @@ public class DBConnection {
     public ArrayList<Book> searchBooksByGenre(String genre) {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE genre = '" + genre + "'");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE genre = '" + genre + "'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
@@ -121,25 +173,25 @@ public class DBConnection {
         return books;
     }
     
-    public ArrayList<Book> searchBooksByID(int id) {
-        ArrayList<Book> books = new ArrayList<Book>();
+    public Book searchBooksByID(int id) {
+        Book book = null;
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT * FROM Books WHERE book_id = " + id);
-            while (rs.next()) {
-                Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
-                books.add(currBook);
-            }
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_id = " + id);
+            rs.next();
+            book = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of book with id " + id);
             e.printStackTrace();
         }
-        return books;
+        return book;
     }
     
     public boolean bookAvailable(Book book) {
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Books WHERE book_id = " + book.getID() + " AND book_num_available > 0");
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT 1 FROM Books WHERE book_id = " + book.getID() + " AND book_num_available > 0");
             if (rs.next()) {
                 return true;
             }
@@ -152,7 +204,8 @@ public class DBConnection {
     
     public boolean userDoesNotHaveBook(Member member, Book book) {
         try {
-            ResultSet rs = this.myStmt.executeQuery("SELECT 1 FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT 1 FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             if (!rs.next()) {
                 return true;
             }
@@ -164,19 +217,20 @@ public class DBConnection {
     }
     
     
-    public void checkoutBook(Member member, Book book) {
+    public BookItem checkoutBook(Member member, Book book) {
         long dueTimeMilliseconds = System.currentTimeMillis() + (14 * 86400000);
         Timestamp dueTime = new Timestamp(dueTimeMilliseconds);
+        BookItem bookItem = new BookItem(book, dueTime, false);
         try {
-            this.myStmt.executeUpdate("UPDATE Books SET book_num_available = book_num_available - 1, book_num_checked_out = book_num_checked_out + 1 WHERE Book_id = " + book.getID());
-            this.myStmt.executeUpdate("INSERT INTO Books_Members VALUES('" + member.getUsername() + "', " + book.getID() + ", '" + dueTime + "')");
-            return;
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("UPDATE Books SET book_num_available = book_num_available - 1, book_num_checked_out = book_num_checked_out + 1 WHERE Book_id = " + book.getID());
+            st.executeUpdate("INSERT INTO Books_Members VALUES('" + member.getUsername() + "', " + book.getID() + ", '" + dueTime + "', FALSE)");
         }
         catch (Exception e) {
             System.out.println("Failed to checkout book");
             e.printStackTrace();
         }
-        return;
+        return bookItem;
     }
     
     

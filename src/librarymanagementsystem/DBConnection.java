@@ -22,6 +22,16 @@ public class DBConnection {
         }
     }
     
+    public void updateFine(Member member, double newFine) {
+        try {
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("UPDATE Members SET member_fine = " + newFine + " WHERE member_username = '" + member.getUsername() + "'");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void returnBook(Member member, BookItem book) {
         try {
             Statement st = this.myConn.createStatement();
@@ -29,7 +39,7 @@ public class DBConnection {
                     + " AND book_id = " + book.getID());
             st.executeUpdate("UPDATE Books SET book_num_available = book_num_available + 1, book_num_checked_out = book_num_checked_out - 1 WHERE book_id = " + book.getID());
         }
-        catch(Exception e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

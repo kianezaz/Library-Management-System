@@ -6,9 +6,9 @@ import java.util.HashMap;
 public class Member extends Account {
     
     private ArrayList<BookItem> booksCheckedOut;
-    private int fine;
+    private double fine;
     
-    public Member(String username, String password, Person user, ArrayList<BookItem> booksCheckedOut, int fine) {
+    public Member(String username, String password, Person user, ArrayList<BookItem> booksCheckedOut, double fine) {
         super(username, password, user);
         this.fine = fine;
         this.booksCheckedOut = booksCheckedOut;
@@ -44,6 +44,11 @@ public class Member extends Account {
         this.booksCheckedOut.remove(book);
     }
     
+    public void payFine(double amount) {
+        DBConnection db = new DBConnection();
+        db.updateFine(this, this.getFine() - amount);
+    }
+    
     public ArrayList<BookItem> getBooksCheckedOut() {
         return this.booksCheckedOut;
     }
@@ -52,7 +57,13 @@ public class Member extends Account {
         this.booksCheckedOut = books;
     }
     
-    public int getFine() {
+    public double getFine() {
         return this.fine;
+    }
+    
+    public void setFine(double fine) {
+        this.fine = fine;
+        DBConnection db = new DBConnection();
+        db.updateFine(this, fine);
     }
 }

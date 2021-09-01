@@ -127,7 +127,7 @@ public class Main {
             System.out.println("Type 2 if you would like to renew a checked out book");
             System.out.println("Type 3 if you would like to see the list of books you currently have checked out");
             System.out.println("Type 4 if you would like to return a checked out book");
-            System.out.println("Type 5 if you would like to pay off your fine");
+            System.out.println("Type 5 if you would like to view and/or pay off your fine");
             System.out.println("Type 6 to exit");
             actionOption = sc.nextInt();
             sc.nextLine();
@@ -141,10 +141,10 @@ public class Main {
                 listBooks(member);
             }
             else if (actionOption == 4) {
-                returnBooks(member);
+                returnBook(member);
             }
             else if (actionOption == 5) {
-                // payFine();
+                // payFine(member);
             }
             else if (actionOption == 6) {
                 return;
@@ -155,8 +155,38 @@ public class Main {
         }
     }
     
+    public static void viewFine(Member member) {
+        String option;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Your total fine is " + member.getFine());
+        while (true) {
+            System.out.println("Type y if you would like to pay off some of or all of this fine");
+            System.out.println("Type n to exit to the main menu.");
+            option = sc.nextLine();
+            if (option.equals("Y") || option.equals("y") || option.equals("N") || option.equals("n")) {
+                break;
+            }
+        }
+        if (option.equals("Y") || option.equals("y")) {
+            double amount;
+            while (true) {
+                System.out.println("Type in the amount you would like to pay");
+                amount = sc.nextDouble();
+                if (amount >= 0 && amount <= member.getFine()) {
+                    break;
+                }
+                System.out.println(badInput);
+            }
+            payFine(member, amount);
+        }
+    }
+    
+    public static void payFine(Member member, double amount) {
+        member.payFine(amount);
+    }
+    
     // Think about implementing this by allowing member to return multiple books at once   
-    public static void returnBooks(Member member) {
+    public static void returnBook(Member member) {
         if (member.getBooksCheckedOut().size() == 0) {
             return;
         }
@@ -172,8 +202,19 @@ public class Main {
             }
             break;
         }
-        member.returnBook(member.getBooksCheckedOut().get(bookNum - 1));
+        BookItem bookToReturn = member.getBooksCheckedOut().get(bookNum - 1);
+        member.returnBook(bookToReturn);
         System.out.println("Successfully returned book!");
+        java.sql.Date currDate = new java.sql.Date(System.currentTimeMillis());
+        // book is overdue
+        if (currDate.after(bookToReturn.dueTime)) {
+            long differenceMilliseconds = currDate.getTime() - bookToReturn.dueTime.getTime();
+            int daysOverdue = (int) (differenceMilliseconds / 86400000);
+            double fineIncrement = .25 * daysOverdue;
+            System.out.println("This book is " + daysOverdue + " overdue");
+            System.out.println("Adding a fine of " + fineIncrement + " to your account");
+            member.setFine(member.getFine() + fineIncrement);
+        }
     }
     
     public static void listBooks(Member member) {
@@ -291,11 +332,19 @@ public class Main {
         
     
     public static void main(String[] args) {
+        /*
         int option;
         Scanner sc = new Scanner(System.in);
         DBConnection db = new DBConnection();
         System.out.println("Welcome to the Library Management System!");
         printIdentityOptions();
+        */
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        System.out.println(date);
+        java.sql.Date date2 = new java.sql.Date(System.currentTimeMillis() + (14 * 86400000));
+        System.out.println(date2);
+        int difference = (int) (date2.getTime() - date.getTime()) / 86400000;
+        System.out.println(difference);
     }
 
 }

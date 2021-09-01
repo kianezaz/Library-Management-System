@@ -22,6 +22,18 @@ public class DBConnection {
         }
     }
     
+    public void returnBook(Member member, BookItem book) {
+        try {
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("DELETE FROM Books_Members WHERE member_username = '" + member.getUsername() + "'"
+                    + " AND book_id = " + book.getID());
+            st.executeUpdate("UPDATE Books SET book_num_available = book_num_available + 1, book_num_checked_out = book_num_checked_out - 1 WHERE book_id = " + book.getID());
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public ArrayList<BookItem> getMemberBooks(String username) {
         ArrayList<BookItem> memberBooks = new ArrayList<BookItem>();
         try {
@@ -31,11 +43,10 @@ public class DBConnection {
             while (rs.next()) {
                 currBook = this.searchBooksByID(rs.getInt(1));
                 //int currID = rs.getInt(1);
-                Timestamp dueTime = rs.getTimestamp(2);
+                java.sql.Date dueTime = rs.getDate(2);
                 Boolean renewed = rs.getBoolean(3);
                 BookItem currBookItem = new BookItem(currBook.getID(), currBook.getTitle(),
                         currBook.getAuthor(), currBook.getGenre(), dueTime, renewed);
-                //System.out.println("Putting book with title " + currBook.getTitle() + " into map");
                 memberBooks.add(currBookItem);
             }
         }
@@ -50,8 +61,8 @@ public class DBConnection {
             Statement st = this.myConn.createStatement();
             ResultSet rs = st.executeQuery("SELECT book_due_date FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             if (rs.next()) {
-                long currDueDate = rs.getTimestamp(1).getTime();
-                Timestamp newDueDate = new Timestamp(currDueDate + (14 * 86400000));
+                long currDueDate = rs.getDate(1).getTime();
+                java.sql.Date newDueDate = new java.sql.Date(currDueDate + (14 * 86400000));
                 st.executeUpdate("UPDATE Books_Members SET book_due_date = '" + newDueDate + "', renewed = TRUE WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             }
         }
@@ -219,7 +230,7 @@ public class DBConnection {
     
     public BookItem checkoutBook(Member member, Book book) {
         long dueTimeMilliseconds = System.currentTimeMillis() + (14 * 86400000);
-        Timestamp dueTime = new Timestamp(dueTimeMilliseconds);
+        java.sql.Date dueTime = new Date(dueTimeMilliseconds);
         BookItem bookItem = new BookItem(book, dueTime, false);
         try {
             Statement st = this.myConn.createStatement();

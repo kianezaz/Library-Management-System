@@ -38,11 +38,21 @@ public class Member extends Account {
         this.booksCheckedOut.get(index).renewed = true;
     }
     
+    public void returnBook(BookItem book) {
+        DBConnection db = new DBConnection();
+        db.returnBook(this, book);
+        this.booksCheckedOut.remove(book);
+    }
+    
     public ArrayList<BookItem> getBooksCheckedOut() {
         return this.booksCheckedOut;
     }
     
-    public int fine() {
+    public void setBooksCheckedOut(ArrayList<BookItem> books) {
+        this.booksCheckedOut = books;
+    }
+    
+    public int getFine() {
         return this.fine;
     }
 }

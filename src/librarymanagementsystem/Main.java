@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public class Main {
     
@@ -137,10 +138,10 @@ public class Main {
                 renewProcess(member);
             }
             else if (actionOption == 3) {
-                // listBooks();
+                listBooks(member);
             }
             else if (actionOption == 4) {
-                // returnBooks();
+                returnBooks(member);
             }
             else if (actionOption == 5) {
                 // payFine();
@@ -154,12 +155,50 @@ public class Main {
         }
     }
     
+    // Think about implementing this by allowing member to return multiple books at once   
+    public static void returnBooks(Member member) {
+        if (member.getBooksCheckedOut().size() == 0) {
+            return;
+        }
+        Scanner sc = new Scanner(System.in);
+        listBooks(member);
+        int bookNum = 0;
+        while (true) {
+            System.out.println("Enter the number corresponding to the book you would like to return");
+            bookNum = sc.nextInt();
+            if (bookNum < 1 || bookNum > member.getBooksCheckedOut().size()) {
+                System.out.println(badInput);
+                continue;
+            }
+            break;
+        }
+        member.returnBook(member.getBooksCheckedOut().get(bookNum - 1));
+        System.out.println("Successfully returned book!");
+    }
+    
+    public static void listBooks(Member member) {
+        if (member.getBooksCheckedOut().size() == 0) {
+            System.out.println("You currently do not have any books checked out");
+        }
+        else {
+            BookItem curr;
+            for (int i = 0; i < member.getBooksCheckedOut().size(); i++) {
+                curr = member.getBooksCheckedOut().get(i);
+                System.out.println((i + 1) + ":\tTitle: " + curr.getTitle() + " | Author: " + curr.getAuthor()
+                    + " | Genre: " + curr.getGenre() + " | Renewed: " + curr.getRenewed() + " | "
+                    + "Due time: " + curr.getDueTime());
+            }
+        }
+    }
+    
+ // Think about implementing this by allowing member to renew multiple books at once 
     public static void renewProcess(Member member) {
         Scanner sc = new Scanner(System.in);
         BookItem curr;
         ArrayList<BookItem> allowedToRenew = new ArrayList<BookItem>();
-        for (int i = 0, j = 0; i < member.getBooksCheckedOut().size(); i++) {
-            curr = member.getBooksCheckedOut().get(i);
+        ArrayList<BookItem> memberBooks = member.getBooksCheckedOut();
+        for (int i = 0, j = 0; i < memberBooks.size(); i++) {
+            curr = memberBooks.get(i);
             if (!curr.getRenewed()) {
                 System.out.println((j + 1) + "\tTitle: " + curr.getTitle() + 
                         " | Author: " + curr.getAuthor() + " | Genre: " + curr.getGenre());
@@ -171,9 +210,9 @@ public class Main {
             System.out.println("No books to renew");
             return;
         }
-        System.out.println("Type the number that matches the book you would like to renew (you may only renew each book once)");
         int bookNum;
         while (true) {
+            System.out.println("Type the number that matches the book you would like to renew (you may only renew each book once)");
             bookNum = sc.nextInt();
             if (bookNum < 1 || bookNum > allowedToRenew.size()) {
                 System.out.println(badInput);

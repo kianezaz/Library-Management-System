@@ -3,8 +3,8 @@ package librarymanagementsystem;
 
 public class BookItem extends Book {
     
-    java.sql.Date dueTime;
-    boolean renewed;
+    private java.sql.Date dueTime;
+    private boolean renewed;
     
     public BookItem(Book book, java.sql.Date dueTime, boolean renewed) {
         super(book.getID(), book.getTitle(), book.getAuthor(), book.getGenre());
@@ -24,5 +24,13 @@ public class BookItem extends Book {
     
     public boolean getRenewed() {
         return this.renewed;
+    }
+    
+    public void setDueTime(java.sql.Date dueTime) {
+        this.dueTime = dueTime;
+    }
+    
+    public void setRenewed(boolean renewed) {
+        this.renewed = renewed;
     }
 }

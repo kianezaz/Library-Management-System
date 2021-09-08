@@ -52,7 +52,6 @@ public class DBConnection {
             Book currBook;
             while (rs.next()) {
                 currBook = this.searchBooksByID(rs.getInt(1));
-                //int currID = rs.getInt(1);
                 java.sql.Date dueTime = rs.getDate(2);
                 Boolean renewed = rs.getBoolean(3);
                 BookItem currBookItem = new BookItem(currBook.getID(), currBook.getTitle(),
@@ -72,7 +71,9 @@ public class DBConnection {
             ResultSet rs = st.executeQuery("SELECT book_due_date FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             if (rs.next()) {
                 long currDueDate = rs.getDate(1).getTime();
+                System.out.println("The current date is " + rs.getDate(1));
                 java.sql.Date newDueDate = new java.sql.Date(currDueDate + (14 * 86400000));
+                System.out.println("The new due date is " + newDueDate + "\n");
                 st.executeUpdate("UPDATE Books_Members SET book_due_date = '" + newDueDate + "', renewed = TRUE WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             }
         }
@@ -181,7 +182,7 @@ public class DBConnection {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
             Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE genre = '" + genre + "'");
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_genre = '" + genre + "'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);

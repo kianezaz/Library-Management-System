@@ -24,7 +24,7 @@ public class Book {
         if (db.bookAvailable(this)) {
             return true;
         }
-        System.out.println("Sorry, all copies of this book are currently checked out");
+        System.out.println("Sorry, all copies of this book are currently checked out\n");
         return false;
     }
     

@@ -1,5 +1,6 @@
 package librarymanagementsystem;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,7 +20,7 @@ public class Member extends Account {
             return false;
         }
         if (this.booksCheckedOut.contains(book)) {
-             System.out.println("You currently have this book checked out");
+             System.out.println("You currently have this book checked out\n");
              return false;
         }
         return true;
@@ -34,8 +35,9 @@ public class Member extends Account {
     public void renewBook(BookItem book) {
         DBConnection db = new DBConnection();
         db.renewMemberBook(this, book);
-        int index = this.booksCheckedOut.indexOf(book);
-        this.booksCheckedOut.get(index).renewed = true;
+        book.setRenewed(true);
+        java.sql.Date newDueTime = new java.sql.Date(book.getDueTime().getTime() + (14 * 86400000));
+        book.setDueTime(newDueTime);
     }
     
     public void returnBook(BookItem book) {
@@ -44,9 +46,26 @@ public class Member extends Account {
         this.booksCheckedOut.remove(book);
     }
     
+    public void updateFineUponLogin() {
+        DBConnection db = new DBConnection();
+        double fineIncrement = 0;
+        for (int i = 0; i < booksCheckedOut.size(); i++) {
+            int daysOverdue = (int) ((System.currentTimeMillis() - booksCheckedOut.get(i).getDueTime().getTime()) / 86400000);
+            if (daysOverdue <= 0) {
+                continue;
+            }
+            fineIncrement += .25 * daysOverdue;
+        }
+        if (fineIncrement > 0) {
+            this.fine += fineIncrement;
+            db.updateFine(this, fine);
+        }
+    }
+    
     public void payFine(double amount) {
         DBConnection db = new DBConnection();
         db.updateFine(this, this.getFine() - amount);
+        this.fine -= amount;
     }
     
     public ArrayList<BookItem> getBooksCheckedOut() {

@@ -308,7 +308,7 @@ public class Main {
             member.checkoutBook(chosenBook);
             break;
         }
-        System.out.println("Successfully checked out book\n");
+        System.out.println("Successfully checked out book!\n");
         return;
     }
     

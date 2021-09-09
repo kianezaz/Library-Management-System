@@ -30,6 +30,7 @@ public class Member extends Account {
         DBConnection db = new DBConnection();
         BookItem checkedOut = db.checkoutBook(this, book);
         this.booksCheckedOut.add(checkedOut);
+        db.disconnect();
     }
     
     public void renewBook(BookItem book) {
@@ -38,12 +39,14 @@ public class Member extends Account {
         book.setRenewed(true);
         java.sql.Date newDueTime = new java.sql.Date(book.getDueTime().getTime() + (14 * 86400000));
         book.setDueTime(newDueTime);
+        db.disconnect();
     }
     
     public void returnBook(BookItem book) {
         DBConnection db = new DBConnection();
         db.returnBook(this, book);
         this.booksCheckedOut.remove(book);
+        db.disconnect();
     }
     
     public void updateFineUponLogin() {
@@ -60,12 +63,14 @@ public class Member extends Account {
             this.fine += fineIncrement;
             db.updateFine(this, fine);
         }
+        db.disconnect();
     }
     
     public void payFine(double amount) {
         DBConnection db = new DBConnection();
         db.updateFine(this, this.getFine() - amount);
         this.fine -= amount;
+        db.disconnect();
     }
     
     public ArrayList<BookItem> getBooksCheckedOut() {
@@ -84,5 +89,6 @@ public class Member extends Account {
         this.fine = fine;
         DBConnection db = new DBConnection();
         db.updateFine(this, fine);
+        db.disconnect();
     }
 }

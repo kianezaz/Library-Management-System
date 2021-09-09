@@ -22,6 +22,78 @@ public class DBConnection {
         }
     }
     
+    public void disconnect() {
+        try {
+            if (this.myConn != null) {
+                this.myConn.close();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public boolean removeBook(int bookId) {
+        try {
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT book_num_checked_out FROM Books WHERE book_id = " + bookId);
+            if (!rs.next()) {
+                System.out.println("Failed to find book with the given book id\n");
+                return false;
+            }
+            if (rs.getInt(1) > 0) {
+                System.out.println("Failed to remove book. At least one copy is currently checked out");
+                return false;
+            }
+            st.executeUpdate("DELETE FROM Books WHERE book_id = " + bookId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+    
+    public int bookExactLookup(String title, String author, String genre) {
+        try {
+            Statement st = this.myConn.createStatement();
+            ResultSet rs = st.executeQuery("SELECT book_id FROM Books WHERE book_title = '" + title + "' AND primary_author_name = '" + author + "' AND book_genre = '" + genre + "'");
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    
+    public void addNewBook(String title, String author, String genre, int numCopies) {
+        try {
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("INSERT INTO Books(book_title, primary_author_name, book_genre, book_num_available, "
+                    + "book_num_checked_out) VALUES('" + title + "', '" + author + "', '" + genre + "', "
+                            + numCopies + ", 0)");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void addExistingBook(int bookId, int numCopies) {
+        try {
+            Statement st = this.myConn.createStatement();
+            st.executeUpdate("UPDATE Books SET book_num_available = book_num_available + " + numCopies + " WHERE book_id = " + bookId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    
+    
+    
+    
     public void updateFine(Member member, double newFine) {
         try {
             Statement st = this.myConn.createStatement();
@@ -87,7 +159,6 @@ public class DBConnection {
             return null;
         }
         String singularAccType = accountType.substring(0, accountType.length() - 1);
-        boolean correctLogin = false;
         Account account;
         try {
             Statement st = this.myConn.createStatement();

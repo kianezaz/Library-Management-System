@@ -78,8 +78,10 @@ public class Main {
         } while (true);
         System.out.println("Enter your new password: ");
         String password = sc.nextLine();
+        System.out.println();
         newUser = new Person(firstName + " " + lastName, email);
         db.createAccount(username, password, accountTypeString, newUser);
+        db.disconnect();
         System.out.println("Account created!\n");
         printIdentityOptions();
     }
@@ -107,6 +109,7 @@ public class Main {
             }
             System.out.println("Incorrect username or password\n");
         }
+        db.disconnect();
         System.out.println("Verified login\n");
         if (accountTypeInt == 1) {
             Member member = (Member) account;
@@ -116,13 +119,102 @@ public class Main {
         }
         else {
             Librarian librarian = (Librarian) account;
-            // printLibrarianMainMenu()
+            printLibrarianMainMenu(librarian);
             return;
         }
     }
     
+    public static void printLibrarianMainMenu(Librarian librarian) {
+        int actionOption;
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            System.out.println("Type 1 if you would like to add a book to the library catalog");
+            System.out.println("Type 2 if you would like to remove a book from the library catalog\n");
+            actionOption = sc.nextInt();
+            sc.nextLine();
+            System.out.println();
+            if (actionOption == 1) {
+                addBook(librarian);
+            }
+            else if (actionOption == 2) {
+                removeBook(librarian);
+            }
+            else {
+                System.out.println(badInput);
+            }
+        }
+    }
+    
+    public static void removeBook(Librarian librarian) {
+        Scanner sc = new Scanner(System.in);
+        String knowsId;
+        boolean flag = false;
+        while (true) {
+            System.out.println("Type 'y' if you know the id of the book to be removed");
+            System.out.println("Type 'n' if you don't know the id of the book to be removed\n");
+            knowsId = sc.nextLine();
+            System.out.println();
+            if (knowsId.equals("Y") || knowsId.equals("y") || knowsId.equals("N") || knowsId.equals("n")) {
+                break;
+            }
+            System.out.println(badInput);
+        }
+        if (knowsId.equals("Y") || knowsId.equals("y")) {
+            int bookId = 0;
+            System.out.println("Enter book id:");
+            bookId = sc.nextInt();
+            sc.nextLine();
+            System.out.println();
+            flag = librarian.removeBook(bookId);
+        }
+        else {
+            while (true) {
+                System.out.println("Type 1 if you would like to search by title");
+                System.out.println("Type 2 if you would like to search by author");
+                System.out.println("Type 3 if you would like to search by genre\n");
+                int searchOption = sc.nextInt();
+                sc.nextLine();
+                if (searchOption < 1 || searchOption > 3) {
+                    System.out.println(badInput);
+                    continue;
+                }
+                Book chosenBook = searchBook(searchOption);
+                if (chosenBook == null) {
+                    System.out.println("Type 'y' if you would like to continue searching");
+                    System.out.println("Type 'n' if you would like to exit to main menu\n");
+                    String failedSearchOption = sc.nextLine();
+                    System.out.println();
+                    if (failedSearchOption.equals("y") || failedSearchOption.equals("Y")) {
+                        continue;
+                    }
+                    return;
+                }
+                flag = librarian.removeBook(chosenBook.getID());
+                break;
+            }
+        }
+        if (flag) {
+            System.out.println("Successfully removed book!\n");
+        }
+    }
+    
+    public static void addBook(Librarian librarian) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter book title: ");
+        String title = sc.nextLine();
+        System.out.println("Enter book author: ");
+        String author = sc.nextLine();
+        System.out.println("Enter book genre: ");
+        String genre = sc.nextLine();
+        System.out.println("How many copies of this book would you like to add?");
+        int numCopies = sc.nextInt();
+        sc.nextLine();
+        System.out.println();
+        librarian.addBook(title, author, genre, numCopies);
+        System.out.println("Successfully added " + numCopies + " copies of this book!\n");
+    }
+    
     public static void printMemberMainMenu(Member member) {
-        DBConnection db = new DBConnection();
         int actionOption;
         Scanner sc = new Scanner(System.in);
         while (true) {
@@ -173,6 +265,7 @@ public class Main {
             if (option.equals("Y") || option.equals("y") || option.equals("N") || option.equals("n")) {
                 break;
             }
+            System.out.println(badInput);
         }
         if (option.equals("Y") || option.equals("y")) {
             payFine(member);
@@ -283,6 +376,10 @@ public class Main {
     }
     
     public static void checkoutProcess(Member member) {
+        if (member.getBooksCheckedOut().size() == 10) {
+            System.out.println("You may not have more than 10 books checked out at a time."
+                    + " Return 1 or more books before checking out another book");
+        }
         Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.println("Type 1 if you would like to search by title");
@@ -337,6 +434,7 @@ public class Main {
             System.out.println("Sorry, no matching books were found in our catalog\n");
             return null;
         }
+        db.disconnect();
         Book currBook;
         System.out.println("Type the number that matches the book you're interested in\n");
         for (int i = 0; i < books.size(); i++) {
@@ -354,7 +452,6 @@ public class Main {
     
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        DBConnection db = new DBConnection();
         System.out.println("Welcome to the Library Management System!");
         printIdentityOptions();
     }

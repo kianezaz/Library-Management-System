@@ -25,6 +25,7 @@ public class Book {
             return true;
         }
         System.out.println("Sorry, all copies of this book are currently checked out\n");
+        db.disconnect();
         return false;
     }
     

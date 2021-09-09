@@ -204,7 +204,8 @@ public class Main {
             System.out.println("Type 3 if you would like to see the list of books you currently have checked out");
             System.out.println("Type 4 if you would like to return a checked out book");
             System.out.println("Type 5 if you would like to view and/or pay off your fine");
-            System.out.println("Type 6 to log out\n");
+            System.out.println("Type 6 if you would like to delete your account");
+            System.out.println("Type 7 to log out\n");
             actionOption = sc.nextInt();
             sc.nextLine();
             System.out.println();
@@ -224,12 +225,20 @@ public class Main {
                 viewFine(member);
             }
             else if (actionOption == 6) {
+                deleteOwnAccount(member);
+            }
+            else if (actionOption == 7) {
                 return;
             }
             else {
                 System.out.println(badInput);
             }
         }
+    }
+    
+    public static void deleteOwnAccount(Account account) {
+        account.deleteAccount();
+        System.out.println("Successfully deleted account!\n");
     }
     
     public static void viewFine(Member member) {

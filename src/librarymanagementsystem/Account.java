@@ -12,6 +12,12 @@ public abstract class Account {
         this.user = user;
     }
     
+    public void deleteAccount() {
+        DBConnection db = new DBConnection();
+        db.deleteAccount(this);
+        db.disconnect();
+    }
+    
     public String getUsername() {
         return this.username;
     }

@@ -31,6 +31,28 @@ public class DBConnection {
         }
     }
     
+    public void deleteAccount(Account account) {
+        Statement st = null;
+        try {
+            st = this.myConn.createStatement();
+            if (account instanceof Member) {
+                st.executeUpdate("DELETE FROM Members WHERE member_username = '" + account.getUsername() + "'");
+            }
+            else {
+                st.executeUpdate("DELETE FROM Librarians WHERE librarian_username = '" + account.getUsername() + "'");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
+    }
+    
     public boolean removeBook(int bookId) {
         Statement st = null;
         ResultSet rs = null;

@@ -24,7 +24,9 @@ public class Librarian extends Account {
     
     public boolean removeBook(int id) {
         DBConnection db = new DBConnection();
-        if (db.removeBook(id)) {
+        boolean flag = db.removeBook(id);
+        db.disconnect();
+        if (flag) {
             return true;
         }
         return false;

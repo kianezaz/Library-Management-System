@@ -129,7 +129,8 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.println("Type 1 if you would like to add a book to the library catalog");
-            System.out.println("Type 2 if you would like to remove a book from the library catalog\n");
+            System.out.println("Type 2 if you would like to remove a book from the library catalog");
+            System.out.println("type 3 to exit");
             actionOption = sc.nextInt();
             sc.nextLine();
             System.out.println();
@@ -138,6 +139,9 @@ public class Main {
             }
             else if (actionOption == 2) {
                 removeBook(librarian);
+            }
+            else if (actionOption == 3) {
+                return;
             }
             else {
                 System.out.println(badInput);

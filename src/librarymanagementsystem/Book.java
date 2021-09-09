@@ -1,9 +1,5 @@
 package librarymanagementsystem;
 
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Book {
     
     private int id;

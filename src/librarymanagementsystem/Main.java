@@ -2,13 +2,6 @@ package librarymanagementsystem;
 
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 
 public class Main {
     
@@ -38,7 +31,7 @@ public class Main {
                 createAccount(4);
             }
             else if (option == 5) {
-                return;
+                System.exit(0);
             }
             else {
                 System.out.println(badInput);
@@ -146,7 +139,7 @@ public class Main {
                 deleteOwnAccount(librarian);
             }
             else if (actionOption == 5) {
-                System.exit(0);
+                return;
             }
             else {
                 System.out.println(badInput);
@@ -178,7 +171,6 @@ public class Main {
     public static Member searchMember(Librarian librarian) {
         Scanner sc = new Scanner(System.in);
         ArrayList<Member> searchedMembers = new ArrayList<Member>();
-        Member searchedMember = null;
         System.out.println("Enter member's username:");
         String username = sc.nextLine();
         searchedMembers = librarian.searchMembers(username);
@@ -298,7 +290,9 @@ public class Main {
                 viewFine(member);
             }
             else if (actionOption == 6) {
-                deleteOwnAccount(member);
+                if (deleteOwnAccount(member)) {
+                    return;
+                }
             }
             else if (actionOption == 7) {
                 return;
@@ -309,18 +303,26 @@ public class Main {
         }
     }
     
-    public static void deleteOwnAccount(Account account) {
-        account.deleteOwnAccount();
-        System.out.println("Successfully deleted account!\n");
+    public static boolean deleteOwnAccount(Account account) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Type 'y' if you are sure you would like to delete your account. Type anything else if not");
+        String answer = sc.nextLine();
+        System.out.println();
+        if (answer.equals("y") || answer.equals("Y")) {
+            account.deleteOwnAccount();
+            System.out.println("Successfully deleted account!\n");
+            return true;
+        }
+        return false;
     }
     
     public static void viewFine(Member member) {
         String option;
-        Scanner sc = new Scanner(System.in);
         System.out.println("Your total fine is " + member.getFine() + "\n");
         if (member.getFine() == 0) {
             return;
         }
+        Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.println("Type y if you would like to pay off some of or all of this fine");
             System.out.println("Type n to exit to the main menu\n");

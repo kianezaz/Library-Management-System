@@ -70,7 +70,8 @@ public class Main {
             if (db.usernameAvailable(username, accountTypeString)) {
                 break;
             }
-            System.out.println("That username is not available. Please choose another username");
+            System.out.println();
+            System.out.println("That username is not available. Please choose another username\n");
         } while (true);
         System.out.println("Enter your new password: ");
         String password = sc.nextLine();
@@ -126,7 +127,9 @@ public class Main {
         while (true) {
             System.out.println("Type 1 if you would like to add a book to the library catalog");
             System.out.println("Type 2 if you would like to remove a book from the library catalog");
-            System.out.println("type 3 to log out\n");
+            System.out.println("Type 3 to delete a member's account");
+            System.out.println("type 4 to delete your account");
+            System.out.println("Type 5 to log out\n");
             actionOption = sc.nextInt();
             sc.nextLine();
             System.out.println();
@@ -137,12 +140,82 @@ public class Main {
                 removeBook(librarian);
             }
             else if (actionOption == 3) {
-                return;
+                deleteMemberAccount(librarian);
+            }
+            else if (actionOption == 4) {
+                deleteOwnAccount(librarian);
+            }
+            else if (actionOption == 5) {
+                System.exit(0);
             }
             else {
                 System.out.println(badInput);
             }
         }
+    }
+    
+    public static void deleteMemberAccount(Librarian librarian) {
+        Scanner sc = new Scanner(System.in);
+        Member chosenMember = null;
+        while (true) {
+            chosenMember = searchMember(librarian);
+            if (chosenMember == null) {
+                System.out.println("Type 'y' if you would like to continue searching");
+                System.out.println("Type 'n' if you would like to exit to main menu\n");
+                String failedSearchOption = sc.nextLine();
+                System.out.println();
+                if (failedSearchOption.equals("y") || failedSearchOption.equals("Y")) {
+                    continue;
+                }
+                return;
+            }
+            break;
+        }
+        librarian.deleteMemberAccount(chosenMember);
+        System.out.println("Successfully deleted account!\n");
+    }
+    
+    public static Member searchMember(Librarian librarian) {
+        Scanner sc = new Scanner(System.in);
+        ArrayList<Member> searchedMembers = new ArrayList<Member>();
+        Member searchedMember = null;
+        System.out.println("Enter member's username:");
+        String username = sc.nextLine();
+        searchedMembers = librarian.searchMembers(username);
+        return handleSearchedMembers(searchedMembers);      
+    }
+    
+    public static Member handleSearchedMembers(ArrayList<Member> members) {
+        if (members.isEmpty()) {
+            System.out.println("\nSorry, no matching members were found in our system\n");
+            return null;
+        }
+        Scanner sc = new Scanner(System.in);
+        Member currMember;
+        Member chosenMember;
+        int memberOption = 0;
+        while (true) {
+            System.out.println("\nType the number that matches the member to be removed, or 0 if no members match\n");
+            for (int i = 1; i <= members.size(); i++) {
+                currMember = members.get(i - 1);
+                System.out.println(i + "\tUsername: " + currMember.getUsername());
+            }
+            System.out.println();
+            memberOption = sc.nextInt();
+            sc.nextLine();
+            System.out.println();
+            if (memberOption > 0 && memberOption <= members.size()) {
+                chosenMember = members.get(memberOption - 1);
+                break;
+            }
+            else if (memberOption == 0) {
+                return null;
+            }
+            else {
+                System.out.println(badInput);
+            }
+        }
+        return chosenMember;
     }
     
     public static void removeBook(Librarian librarian) {
@@ -237,7 +310,7 @@ public class Main {
     }
     
     public static void deleteOwnAccount(Account account) {
-        account.deleteAccount();
+        account.deleteOwnAccount();
         System.out.println("Successfully deleted account!\n");
     }
     

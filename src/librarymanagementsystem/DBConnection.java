@@ -31,6 +31,32 @@ public class DBConnection {
         }
     }
     
+    public ArrayList<Member> searchMembers(String username) {
+        Statement st = null;
+        ResultSet rs = null;
+        ArrayList<Member> members = new ArrayList<Member>();
+        try {
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("Select member_username FROM Members WHERE member_username LIKE '%" + username + "%'");
+            while (rs.next()) {
+                Member currMember = new Member(rs.getString(1));
+                members.add(currMember);
+            }
+            return members;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
+    }
+    
     public void deleteAccount(Account account) {
         Statement st = null;
         try {

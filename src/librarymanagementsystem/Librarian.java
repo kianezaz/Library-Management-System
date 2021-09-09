@@ -1,11 +1,24 @@
 package librarymanagementsystem;
 
+import java.util.ArrayList;
+
 public class Librarian extends Account {
     
     public Librarian(String username, String password, Person user) {
         super(username, password, user);
     }
     
+    public void deleteMemberAccount(Member member) {
+        DBConnection db = new DBConnection();
+        db.deleteAccount(member);
+        db.disconnect();
+    }
+    
+    public ArrayList<Member> searchMembers(String username) {
+        DBConnection db = new DBConnection();
+        ArrayList<Member> members = db.searchMembers(username);
+        return members;
+    }
     
     public void addBook(String title, String author, String genre, int numCopies) {
         String modifiedTitle = title.toLowerCase();

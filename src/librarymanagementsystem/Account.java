@@ -6,13 +6,17 @@ public abstract class Account {
     private String password;
     private Person user;
     
+    public Account(String username) {
+        this.username = username;
+    }
+    
     public Account(String username, String password, Person user) {
         this.username = username;
         this.password = password;
         this.user = user;
     }
     
-    public void deleteAccount() {
+    public void deleteOwnAccount() {
         DBConnection db = new DBConnection();
         db.deleteAccount(this);
         db.disconnect();

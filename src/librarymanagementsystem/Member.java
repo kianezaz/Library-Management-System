@@ -9,6 +9,10 @@ public class Member extends Account {
     private ArrayList<BookItem> booksCheckedOut;
     private double fine;
     
+    public Member(String username) {
+        super(username);
+    }
+    
     public Member(String username, String password, Person user, ArrayList<BookItem> booksCheckedOut, double fine) {
         super(username, password, user);
         this.fine = fine;

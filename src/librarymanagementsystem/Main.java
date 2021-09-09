@@ -27,19 +27,15 @@ public class Main {
             System.out.println();
             if (option == 1) {
                 promptLogin(1);
-                break;
             }
             else if (option == 2) {
                 promptLogin(2);
-                break;
             }
             else if (option == 3) {
                 createAccount(3);
-                break;
             }
             else if (option == 4) {
                 createAccount(4);
-                break;
             }
             else if (option == 5) {
                 return;
@@ -130,7 +126,7 @@ public class Main {
         while (true) {
             System.out.println("Type 1 if you would like to add a book to the library catalog");
             System.out.println("Type 2 if you would like to remove a book from the library catalog");
-            System.out.println("type 3 to exit");
+            System.out.println("type 3 to log out\n");
             actionOption = sc.nextInt();
             sc.nextLine();
             System.out.println();
@@ -151,51 +147,31 @@ public class Main {
     
     public static void removeBook(Librarian librarian) {
         Scanner sc = new Scanner(System.in);
-        String knowsId;
         boolean flag = false;
         while (true) {
-            System.out.println("Type 'y' if you know the id of the book to be removed");
-            System.out.println("Type 'n' if you don't know the id of the book to be removed\n");
-            knowsId = sc.nextLine();
-            System.out.println();
-            if (knowsId.equals("Y") || knowsId.equals("y") || knowsId.equals("N") || knowsId.equals("n")) {
-                break;
-            }
-            System.out.println(badInput);
-        }
-        if (knowsId.equals("Y") || knowsId.equals("y")) {
-            int bookId = 0;
-            System.out.println("Enter book id:");
-            bookId = sc.nextInt();
+            System.out.println("Type 1 if you would like to search by title");
+            System.out.println("Type 2 if you would like to search by author");
+            System.out.println("Type 3 if you would like to search by genre");
+            System.out.println("Type 4 if you would like to search by ID\n");
+            int searchOption = sc.nextInt();
             sc.nextLine();
-            System.out.println();
-            flag = librarian.removeBook(bookId);
-        }
-        else {
-            while (true) {
-                System.out.println("Type 1 if you would like to search by title");
-                System.out.println("Type 2 if you would like to search by author");
-                System.out.println("Type 3 if you would like to search by genre\n");
-                int searchOption = sc.nextInt();
-                sc.nextLine();
-                if (searchOption < 1 || searchOption > 3) {
-                    System.out.println(badInput);
+            if (searchOption < 1 || searchOption > 4) {
+                System.out.println(badInput);
+                continue;
+            }
+            Book chosenBook = searchBook(searchOption);
+            if (chosenBook == null) {
+                System.out.println("Type 'y' if you would like to continue searching");
+                System.out.println("Type 'n' if you would like to exit to main menu\n");
+                String failedSearchOption = sc.nextLine();
+                System.out.println();
+                if (failedSearchOption.equals("y") || failedSearchOption.equals("Y")) {
                     continue;
                 }
-                Book chosenBook = searchBook(searchOption);
-                if (chosenBook == null) {
-                    System.out.println("Type 'y' if you would like to continue searching");
-                    System.out.println("Type 'n' if you would like to exit to main menu\n");
-                    String failedSearchOption = sc.nextLine();
-                    System.out.println();
-                    if (failedSearchOption.equals("y") || failedSearchOption.equals("Y")) {
-                        continue;
-                    }
-                    return;
-                }
-                flag = librarian.removeBook(chosenBook.getID());
-                break;
+                return;
             }
+            flag = librarian.removeBook(chosenBook.getID());
+            break;
         }
         if (flag) {
             System.out.println("Successfully removed book!\n");
@@ -227,7 +203,7 @@ public class Main {
             System.out.println("Type 3 if you would like to see the list of books you currently have checked out");
             System.out.println("Type 4 if you would like to return a checked out book");
             System.out.println("Type 5 if you would like to view and/or pay off your fine");
-            System.out.println("Type 6 to exit\n");
+            System.out.println("Type 6 to log out\n");
             actionOption = sc.nextInt();
             sc.nextLine();
             System.out.println();
@@ -391,6 +367,7 @@ public class Main {
             System.out.println("Type 3 if you would like to search by genre\n");
             int searchOption = sc.nextInt();
             sc.nextLine();
+            System.out.println();
             if (searchOption < 1 || searchOption > 3) {
                 System.out.println(badInput);
                 continue;
@@ -417,39 +394,67 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         DBConnection db = new DBConnection();
         ArrayList<Book> books;
+        Book book;
         System.out.println();
         if (searchOption == 1) {
             System.out.println("Enter book title:");
             String title = sc.nextLine();
             books = db.searchBooksByTitle(title);
+            book = handleSearchedBooks(books);
         }
         else if (searchOption == 2) {
             System.out.println("Enter author:");
             String author = sc.nextLine();
             books = db.searchBooksByAuthor(author);
+            book = handleSearchedBooks(books);
         }
-        else {
+        else if (searchOption == 3) {
             System.out.println("Enter genre:");
             String genre = sc.nextLine();
             books = db.searchBooksByGenre(genre);
+            book = handleSearchedBooks(books);
+        }
+        else {
+            System.out.println("Enter book ID:");
+            int bookId = sc.nextInt();
+            sc.nextLine();
+            book = db.searchBooksByID(bookId);
         }
         System.out.println();
+        db.disconnect();
+        return book;
+    }
+    
+    public static Book handleSearchedBooks(ArrayList<Book> books) {
         if (books.isEmpty()) {
-            System.out.println("Sorry, no matching books were found in our catalog\n");
+            System.out.println("\nSorry, no matching books were found in our catalog\n");
             return null;
         }
-        db.disconnect();
+        Scanner sc = new Scanner(System.in);
         Book currBook;
-        System.out.println("Type the number that matches the book you're interested in\n");
-        for (int i = 0; i < books.size(); i++) {
-            currBook = books.get(i);
-            System.out.println((i + 1) + "\tTitle: " + currBook.getTitle() + " | Author: " + currBook.getAuthor() + " | Genre: " + currBook.getGenre());
+        Book chosenBook;
+        int bookOption = 0;
+        while (true) {
+            System.out.println("\nType the number that matches the book you're interested in, or 0 if no books match\n");
+            for (int i = 1; i <= books.size(); i++) {
+                currBook = books.get(i - 1);
+                System.out.println(i + "\tTitle: " + currBook.getTitle() + " | Author: " + currBook.getAuthor() + " | Genre: " + currBook.getGenre());
+            }
+            System.out.println();
+            bookOption = sc.nextInt();
+            sc.nextLine();
+            System.out.println();
+            if (bookOption > 0 && bookOption <= books.size()) {
+                chosenBook = books.get(bookOption - 1);
+                break;
+            }
+            else if (bookOption == 0) {
+                return null;
+            }
+            else {
+                System.out.println(badInput);
+            }
         }
-        System.out.println();
-        int bookOption = sc.nextInt();
-        sc.nextLine();
-        System.out.println();
-        Book chosenBook = books.get(bookOption - 1);
         return chosenBook;
     }
         

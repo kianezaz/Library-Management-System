@@ -219,14 +219,14 @@ public class DBConnection {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
             Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_title = '" + title + "'");
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_title LIKE '%" + title + "%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
         }
         catch (Exception e) {
-            System.out.println("Failed to check availability of book with title " + title);
+            System.out.println("Failed to check availability of any book containing title '" + title + "'");
             e.printStackTrace();
         }
         return books;
@@ -236,14 +236,14 @@ public class DBConnection {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
             Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE primary_author_name = '" + author +"'");
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE primary_author_name LIKE '%" + author +"%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
         }
         catch (Exception e) {
-            System.out.println("Failed to check availability of book with author " + author);
+            System.out.println("Failed to check availability of any book with author '" + author + "'");
             e.printStackTrace();
         }
         return books;
@@ -253,14 +253,14 @@ public class DBConnection {
         ArrayList<Book> books = new ArrayList<Book>();
         try {
             Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_genre = '" + genre + "'");
+            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_genre LIKE '%" + genre + "%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
         }
         catch (Exception e) {
-            System.out.println("Failed to check availability of book with genre " + genre);
+            System.out.println("Failed to check availability of book with genre '" + genre + "'");
             e.printStackTrace();
         }
         return books;

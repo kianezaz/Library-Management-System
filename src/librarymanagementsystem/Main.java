@@ -155,6 +155,7 @@ public class Main {
             System.out.println("Type 4 if you would like to search by ID\n");
             int searchOption = sc.nextInt();
             sc.nextLine();
+            System.out.println();
             if (searchOption < 1 || searchOption > 4) {
                 System.out.println(badInput);
                 continue;
@@ -395,7 +396,6 @@ public class Main {
         DBConnection db = new DBConnection();
         ArrayList<Book> books;
         Book book;
-        System.out.println();
         if (searchOption == 1) {
             System.out.println("Enter book title:");
             String title = sc.nextLine();
@@ -420,7 +420,6 @@ public class Main {
             sc.nextLine();
             book = db.searchBooksByID(bookId);
         }
-        System.out.println();
         db.disconnect();
         return book;
     }

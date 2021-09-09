@@ -12,9 +12,7 @@ public class DBConnection {
     
     public DBConnection() {
         try {
-            myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/library", "root", "root");
-            //myStmt = myConn.createStatement();
-            
+            myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/library", "root", "root");            
         }
         catch (Exception e) {
             System.out.println("Failed to create connection to the library database");
@@ -34,9 +32,11 @@ public class DBConnection {
     }
     
     public boolean removeBook(int bookId) {
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT book_num_checked_out FROM Books WHERE book_id = " + bookId);
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT book_num_checked_out FROM Books WHERE book_id = " + bookId);
             if (!rs.next()) {
                 System.out.println("Failed to find book with the given book id\n");
                 return false;
@@ -46,30 +46,49 @@ public class DBConnection {
                 return false;
             }
             st.executeUpdate("DELETE FROM Books WHERE book_id = " + bookId);
+            return true;
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return true;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public int bookExactLookup(String title, String author, String genre) {
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT book_id FROM Books WHERE book_title = '" + title + "' AND primary_author_name = '" + author + "' AND book_genre = '" + genre + "'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT book_id FROM Books WHERE book_title = '" + title + "' AND primary_author_name = '" + author + "' AND book_genre = '" + genre + "'");
             if (rs.next()) {
                 return rs.getInt(1);
             }
+            return -1;
         }
         catch (Exception e) {
             e.printStackTrace();
+            return -1;
         }
-        return -1;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public void addNewBook(String title, String author, String genre, int numCopies) {
+        Statement st = null;
         try {
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("INSERT INTO Books(book_title, primary_author_name, book_genre, book_num_available, "
                     + "book_num_checked_out) VALUES('" + title + "', '" + author + "', '" + genre + "', "
                             + numCopies + ", 0)");
@@ -77,15 +96,28 @@ public class DBConnection {
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public void addExistingBook(int bookId, int numCopies) {
+        Statement st = null;
         try {
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("UPDATE Books SET book_num_available = book_num_available + " + numCopies + " WHERE book_id = " + bookId);
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
         }
     }
     
@@ -95,18 +127,26 @@ public class DBConnection {
     
     
     public void updateFine(Member member, double newFine) {
+        Statement st = null;
         try {
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("UPDATE Members SET member_fine = " + newFine + " WHERE member_username = '" + member.getUsername() + "'");
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public void returnBook(Member member, BookItem book) {
+        Statement st = null;
         try {
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("DELETE FROM Books_Members WHERE member_username = '" + member.getUsername() + "'"
                     + " AND book_id = " + book.getID());
             st.executeUpdate("UPDATE Books SET book_num_available = book_num_available + 1, book_num_checked_out = book_num_checked_out - 1 WHERE book_id = " + book.getID());
@@ -114,13 +154,21 @@ public class DBConnection {
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public ArrayList<BookItem> getMemberBooks(String username) {
+        Statement st = null;
+        ResultSet rs = null;
         ArrayList<BookItem> memberBooks = new ArrayList<BookItem>();
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT book_id, book_due_date, renewed FROM Books_Members WHERE member_username = '" + username + "'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT book_id, book_due_date, renewed FROM Books_Members WHERE member_username = '" + username + "'");
             Book currBook;
             while (rs.next()) {
                 currBook = this.searchBooksByID(rs.getInt(1));
@@ -130,17 +178,27 @@ public class DBConnection {
                         currBook.getAuthor(), currBook.getGenre(), dueTime, renewed);
                 memberBooks.add(currBookItem);
             }
+            return memberBooks;
         }
         catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return memberBooks;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public void renewMemberBook(Member member, Book book) {
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT book_due_date FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT book_due_date FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             if (rs.next()) {
                 long currDueDate = rs.getDate(1).getTime();
                 System.out.println("The current date is " + rs.getDate(1));
@@ -152,17 +210,26 @@ public class DBConnection {
         catch (Exception e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public Account verifyLogin(String username, String password, String accountType) {
         if (!accountType.equals("Librarians") && !accountType.equals("Members")) {
             return null;
         }
+        Statement st = null;
+        ResultSet rs = null;
         String singularAccType = accountType.substring(0, accountType.length() - 1);
-        Account account;
+        Account account = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT * FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "' AND " + singularAccType + "_password = '" + password + "'");
             if (rs.next()) {
                 Person user = new Person(rs.getString(3), rs.getString(4));
                 if (accountType.equals("Members")) {
@@ -172,39 +239,56 @@ public class DBConnection {
                 else {
                     account = new Librarian(rs.getString(1), rs.getString(2), user);
                 }
-                return account;
             }
+            return account;
         }
         catch (Exception e) {
             System.out.println("Failed to verify login");
             e.printStackTrace();
+            return null;
         }
-        return null;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public boolean usernameAvailable(String username, String accountType) {
+        Statement st = null;
+        ResultSet rs = null;
         boolean available = false;
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT 1 FROM " + accountType + " WHERE " + singularAccType + "_username = '" + username + "'");
             if (!rs.next()) {
                 available = true;
             }
+            return available;
         }
         catch (Exception e) {
             System.out.println("Failed to verify login");
             e.printStackTrace();
+            return false;
         }
-        return available;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     
     public void createAccount(String username, String password, String accountType, Person user) {
+        Statement st = null;
         String singularAccType = accountType.substring(0, accountType.length() - 1);
         try {
-            // INSERT INTO Members(member_username, member_password, member_name, member_email) VALUES('n', 'pass', 'nader', ne@yahoo.com'
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("INSERT INTO " + accountType + "(" + singularAccType + "_username, " + singularAccType + "_password, "
                     + singularAccType + "_name, " + singularAccType + "_email) VALUES('" + username + "', '" + password + "', '" 
                     + user.getName() + "', '" + user.getEmail() + "')");
@@ -213,117 +297,191 @@ public class DBConnection {
             System.out.println("Failed to create account");
             e.printStackTrace();
         }
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public ArrayList<Book> searchBooksByTitle(String title) {
+        Statement st = null;
+        ResultSet rs = null;
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_title LIKE '%" + title + "%'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT * FROM Books WHERE book_title LIKE '%" + title + "%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
+            return books;
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of any book containing title '" + title + "'");
             e.printStackTrace();
+            return null;
         }
-        return books;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public ArrayList<Book> searchBooksByAuthor(String author) {
+        Statement st = null;
+        ResultSet rs = null;
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE primary_author_name LIKE '%" + author +"%'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT * FROM Books WHERE primary_author_name LIKE '%" + author +"%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
+            return books;
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of any book with author '" + author + "'");
             e.printStackTrace();
+            return null;
         }
-        return books;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public ArrayList<Book> searchBooksByGenre(String genre) {
+        Statement st = null;
+        ResultSet rs = null;
         ArrayList<Book> books = new ArrayList<Book>();
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_genre LIKE '%" + genre + "%'");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT * FROM Books WHERE book_genre LIKE '%" + genre + "%'");
             while (rs.next()) {
                 Book currBook = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
                 books.add(currBook);
             }
+            return books;
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of book with genre '" + genre + "'");
             e.printStackTrace();
+            return null;
         }
-        return books;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public Book searchBooksByID(int id) {
+        Statement st = null;
+        ResultSet rs = null;
         Book book = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM Books WHERE book_id = " + id);
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT * FROM Books WHERE book_id = " + id);
             rs.next();
             book = new Book(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4));
+            return book;
         }
         catch (Exception e) {
             System.out.println("Failed to check availability of book with id " + id);
             e.printStackTrace();
+            return null;
         }
-        return book;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public boolean bookAvailable(Book book) {
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT 1 FROM Books WHERE book_id = " + book.getID() + " AND book_num_available > 0");
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT 1 FROM Books WHERE book_id = " + book.getID() + " AND book_num_available > 0");
             if (rs.next()) {
                 return true;
             }
+            return false;
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     public boolean userDoesNotHaveBook(Member member, Book book) {
+        Statement st = null;
+        ResultSet rs = null;
         try {
-            Statement st = this.myConn.createStatement();
-            ResultSet rs = st.executeQuery("SELECT 1 FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
+            st = this.myConn.createStatement();
+            rs = st.executeQuery("SELECT 1 FROM Books_Members WHERE member_username = '" + member.getUsername() + "' AND book_id = " + book.getID());
             if (!rs.next()) {
                 return true;
             }
+            return false;
         }
         catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+        finally {
+            try {
+                rs.close();
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
     
     public BookItem checkoutBook(Member member, Book book) {
+        Statement st = null;
         long dueTimeMilliseconds = System.currentTimeMillis() + (14 * 86400000);
         java.sql.Date dueTime = new Date(dueTimeMilliseconds);
         BookItem bookItem = new BookItem(book, dueTime, false);
         try {
-            Statement st = this.myConn.createStatement();
+            st = this.myConn.createStatement();
             st.executeUpdate("UPDATE Books SET book_num_available = book_num_available - 1, book_num_checked_out = book_num_checked_out + 1 WHERE Book_id = " + book.getID());
             st.executeUpdate("INSERT INTO Books_Members VALUES('" + member.getUsername() + "', " + book.getID() + ", '" + dueTime + "', FALSE)");
+            return bookItem;
         }
         catch (Exception e) {
             System.out.println("Failed to checkout book");
             e.printStackTrace();
+            return null;
         }
-        return bookItem;
+        finally {
+            try {
+                st.close();
+            }
+            catch (Exception e) {}
+        }
     }
     
 }

@@ -326,21 +326,4 @@ public class DBConnection {
         return bookItem;
     }
     
-    
-    /*
-    
-    public static void main(String[] args) {
-        DBConnection db = new DBConnection();
-        try {
-            db.myStmt.executeUpdate("INSERT INTO Members(member_username, member_password, "
-                    + "member_name, member_email) VALUES('kianezaz', 'pass', 'Kian Ezaz', "
-                    + "'kianezaz@yahoo.com')");
-        }
-        catch(Exception e) {
-            System.out.println("Could not insert new member");
-            e.printStackTrace();
-        }
-    }
-    */
-    
 }

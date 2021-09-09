@@ -48,8 +48,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -71,7 +75,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -100,8 +106,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -124,8 +134,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -144,7 +158,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -161,17 +177,14 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
     }
-    
-    
-    
-    
-    
-    
+     
     public void updateFine(Member member, double newFine) {
         Statement st = null;
         try {
@@ -183,7 +196,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -202,7 +217,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -232,8 +249,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -258,8 +279,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -295,8 +320,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -322,8 +351,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -345,7 +378,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -371,8 +406,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -398,8 +437,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -425,8 +468,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -450,8 +497,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -474,8 +525,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -498,8 +553,12 @@ public class DBConnection {
         }
         finally {
             try {
-                rs.close();
-                st.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }
@@ -524,7 +583,9 @@ public class DBConnection {
         }
         finally {
             try {
-                st.close();
+                if (st != null) {
+                    st.close();
+                }
             }
             catch (Exception e) {}
         }

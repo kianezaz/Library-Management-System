@@ -20,6 +20,9 @@ This Library Management System is a command line based application in which libr
 - Delete his/her own account
 
 ## To run locally on your machine
+To run this project, you'll need to have Java and MySQL installed on your system. You'll also need to have port 3306 (the default port of the MySQL protocol) open.
+
+Next,
 ```
 git clone https://github.com/kianezaz/Library-Management-System.git
 cd Library-Management-System/src
